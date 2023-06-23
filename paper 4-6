@@ -117,5 +117,6 @@ Y=-2210:2210;
 xlabel('\tau');
 ylabel('\tau');
 stem(Y,s3,'filled');
+title('AACFs sums of R_{W^0}(\tau)')
 grid
 axis on
