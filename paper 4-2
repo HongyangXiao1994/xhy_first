@@ -68,7 +68,7 @@ for u=0:9*q^m-1+24
     end
     s(u+1)=s1;
 end
-
+C=D(:,1:1:9*q^m+24);
 s
 s2 = fliplr(s);
 s(1)=[];
@@ -78,3 +78,44 @@ xlabel('\tau');
 stem(Y,s3,'filled');
 grid
 axis on
+
+
+tic
+sym a;
+h=zeros(1,9);
+for i=1:9
+f=C(i,:);
+a=length(f);
+IAPR=zeros(1,10001);
+z=0;
+for t=0:0.0001:1
+  z=10000*t+1; 
+   r = 0;
+    for k = 0:1:a-1
+   r=r+f(k+1)*exp(2*pi*k*sqrt(-1)*t);
+    end
+Pc = r*conj(r);
+
+IAPR(round(z)) = Pc/a;
+
+end
+t=[0:0.0001:1];
+plot(t, IAPR, '-b' );
+grid on
+yticks([0:0.5:10]);
+axis([0 1 0 10]);
+xlabel('t');
+ylabel('The instantaneous-to-average power ratio');
+
+papr_value=max(IAPR);
+h(i)=papr_value;
+end
+disp("The PAPR of f is");
+disp(max(h));
+toc
+xlim=get(gca,'Xlim'); % gca代表此时的绘图区，'Xlim'代表X轴的范围'
+hold on
+plot(xlim,[9,9],'k-','LineWidth',1)
+
+txt = '\downarrow Upper bound ';
+text(0.5,9.2,txt)
