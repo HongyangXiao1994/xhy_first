@@ -1,0 +1,66 @@
+r:=RootOfUnity(4);
+c:={r^i: i in [0..3]};
+d:={<a1,a2,a3,a4>:a1,a2,a3,a4 in c|ComplexConjugate(a1)*a2+ComplexConjugate(a2)*a3+ComplexConjugate(a3)*a4+ComplexConjugate(a4)*a1 eq 0 and ComplexConjugate(a1)*a3+ComplexConjugate(a2)*a4+ComplexConjugate(a3)*a1+ComplexConjugate(a4)*a2 eq 0 and ComplexConjugate(a1)*a4+ComplexConju\
+gate(a2)*a3+ComplexConjugate(a3)*a2+ComplexConjugate(a4)*a1 eq 0};
+d;
+
+{
+    <1, 1, 1, -1>,
+    <-1, 1, 1, 1>,
+    <zeta_4, 1, -zeta_4, 1>,
+    <-zeta_4, 1, zeta_4, 1>,
+    <zeta_4, -zeta_4, -zeta_4, -zeta_4>,
+    <-1, -zeta_4, 1, -zeta_4>,
+    <-1, -zeta_4, -1, zeta_4>,
+    <-1, zeta_4, -1, -zeta_4>,
+    <-1, -1, -1, 1>,
+    <1, -1, -1, -1>,
+    <-zeta_4, 1, -zeta_4, -1>,
+    <zeta_4, -1, zeta_4, 1>,
+    <-1, zeta_4, 1, zeta_4>,
+    <1, -zeta_4, -1, -zeta_4>,
+    <zeta_4, 1, zeta_4, -1>,
+    <-zeta_4, zeta_4, zeta_4, zeta_4>,
+    <-zeta_4, -zeta_4, zeta_4, -zeta_4>,
+    <zeta_4, -1, -zeta_4, -1>,
+    <-zeta_4, zeta_4, -zeta_4, -zeta_4>,
+    <-1, 1, -1, -1>,
+    <1, zeta_4, -1, zeta_4>,
+    <-zeta_4, -1, -zeta_4, 1>,
+    <1, 1, -1, 1>,
+    <zeta_4, zeta_4, -zeta_4, zeta_4>,
+    <1, zeta_4, 1, -zeta_4>,
+    <zeta_4, -zeta_4, zeta_4, zeta_4>,
+    <-zeta_4, -zeta_4, -zeta_4, zeta_4>,
+    <1, -zeta_4, 1, zeta_4>,
+    <-zeta_4, -1, zeta_4, -1>,
+    <-1, -1, 1, -1>,
+    <1, -1, 1, 1>,
+    <zeta_4, zeta_4, zeta_4, -zeta_4>
+}
+
+
+ r:=RootOfUnity(5);
+ c:={r^i: i in [0..2]};
+ d:={<a1,a2,a3, a4,a5>:a1,a2,a3, a4,a5 in c|ComplexConjugate(a1)*a2+ComplexConjugate(a2)*a3+ComplexConjugate(a3)*a1 eq 0};
+ d;
+{
+    <1, -zeta_3 - 1, -zeta_3 - 1>,
+    <-zeta_3 - 1, 1, -zeta_3 - 1>,
+    <1, 1, -zeta_3 - 1>,
+    <-zeta_3 - 1, -zeta_3 - 1, zeta_3>,
+    <zeta_3, 1, 1>,
+    <-zeta_3 - 1, -zeta_3 - 1, 1>,
+    <zeta_3, zeta_3, 1>,
+    <1, zeta_3, 1>,
+    <zeta_3, -zeta_3 - 1, -zeta_3 - 1>,
+    <-zeta_3 - 1, zeta_3, -zeta_3 - 1>,
+    <1, zeta_3, zeta_3>,
+    <1, -zeta_3 - 1, 1>,
+    <1, 1, zeta_3>,
+    <zeta_3, zeta_3, -zeta_3 - 1>,
+    <-zeta_3 - 1, 1, 1>,
+    <zeta_3, -zeta_3 - 1, zeta_3>,
+    <zeta_3, 1, zeta_3>,
+    <-zeta_3 - 1, zeta_3, zeta_3>
+}
