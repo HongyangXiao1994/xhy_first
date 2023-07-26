@@ -1,0 +1,356 @@
+1
+% to extract an exponential of a given base from a number
+% input: num is the given number 
+%        base is the given base
+% output: expo is the exponential and num is the processed number
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+function [expo, num] = expo_dec(num, base)
+expo = 0;
+while mod(num, base) == 0
+    num = num / base;
+    expo = expo + 1;
+end
+
+2
+% to decompose a number into exponentials of some bases
+% input: num is the number to be decomposed
+%        type is a required type of golay sequences
+% output: expo is a row vector whose elements are exponentials of some bases
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+
+function expo = len_dec(num, type)
+init = num;
+switch type
+    case 'binary'
+        base = [26, 10, 2];
+    case 'quaternary'
+        base = [2, 3, 5, 11, 13];
+    otherwise
+        error('Binary or quaternary!');
+end
+
+for i = 1:length(base)
+    [expo{i}, num] = expo_dec(num, base(i));
+end
+
+if num ~= 1
+    error(sprintf('%d is undecomposable', init));
+else
+    if strcmp('binary', type)
+        expo = flip(expo);
+        return
+    else
+        [a, b, c, d, e] = expo{:};
+        uSet = [];
+        for u = 0:a
+            if u <= c+e && b+c+d+e <= a+u+1
+                uSet = [uSet, u];
+            end
+        end
+        if ~isempty(uSet)
+            % to choose a feasible u randormly
+            uRand = uSet(randperm(length(uSet)));
+            u = uRand(1);
+            % to decompose u into uc and ue, the exponential of 10 and 26 respectively
+            uc = randi([max(u-e, 0), min(u, c)]);
+            ue = u - uc;
+            a = a-u;
+            expo = {a, uc, ue, b, c, d, e};
+        else
+            error(sprintf('Exponentials are infeasible'));
+        end
+    end
+end
+
+function [expo, num] = expo_dec(num, base)
+expo = 0;
+while mod(num, base) == 0
+    num = num / base;
+    expo = expo + 1;
+end
+
+3
+% to combine 2 pairs of complex golay sequences by a pair of binary golay sequences
+% input: x and y are binary golay sequences of length g
+%        a and b are complex golay sequences of length g1
+%        c and d are complex golay sequences of length g2
+% output: pair is the genarated golay sequences of length g*g1*g2
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+function pair = golay_glue(x, y, a, b, c, d)
+u = 1/4 * (x+flip(x)+y-flip(y));
+v = 1/4 * (x-flip(x)+y+flip(y));
+s = kron(a, u) + kron(b, v);
+t = kron(a, flip(conj(v))) - kron(b, flip(conj(u)));
+e = kron(c, s) + kron(flip(conj(d)), t);
+f = kron(flip(conj(c)), t) - kron(d, s);
+pair = [e; f];
+
+4
+% to generate Golay sequences of given length and type
+% input: len is the required length
+%        type is the required type，‘binary' or 'quaternary'
+% output:seq is a 2xlen matrix, whose row vectors are golay sequences
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+
+function seq = golay(len, type)
+e2 = [1, 1; 1, -1];
+e10 =[1 -1 -1 1 -1 1 -1 -1 -1 1;
+    1 -1 -1 -1 -1 -1 -1 1 1 -1];
+e26 = [-1,1,-1,-1,1,1,-1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,1,1,-1,-1,-1,1,-1,1;
+    -1,1,-1,-1,1,1,-1,1,1,1,1,-1,1,-1,1,1,1,1,-1,-1,1,1,1,-1,1,-1];
+e3 = [1, 1, -1; 1, 1i, 1];
+e5 = [1i, 1i, 1, -1, 1;
+    1i, 1, 1, 1i, -1];
+e11 = [1, 1i, -1, 1, -1, 1i, -1i, -1, 1i, 1i, 1;
+    1, 1, -1i, -1i, -1i, 1, 1, 1i, -1, 1, -1];
+e13 = [1, 1, 1, 1i, -1, 1, 1, -1i, 1, -1, 1, -1i, 1i;
+    1, 1i, -1, -1, -1, 1i, -1, 1, 1, -1i, -1, 1, -1i];
+
+expo = len_dec(len, type);
+if length(expo) == 7
+    [a, uc, ue, b, c, d, e] = expo{:};
+    cSeq = cell_build({e3, e5, e11, e13}, [b, c-uc, d, e-ue]);
+else
+    [a, uc, ue] = expo{:};
+    cSeq = cell(0);
+end
+rSeq = cell_build({e2, e10, e26}, [a, uc, ue]);
+N1 = length(rSeq);
+N2 = length(cSeq);
+
+% compositions of quaternary sequences
+if N2 > 0
+    seq = cSeq{1};
+    for i = 2:N2
+        s1 = rSeq{i-1};
+        s2 = cSeq{i};
+        seq = golay_glue(s1(1, :), s1(2, :), seq(1, :), seq(2, :), s2(1, :), s2(2, :));
+    end
+else
+    seq = [1; 1];
+end
+
+% compositions of binary sequences and quaternary sequences
+if N2 == 0
+    m = N1;
+else
+    m = N1-N2+1;
+end
+for i = 1:m
+    s1 = rSeq{i+N1-m};
+    seq = golay_glue(s1(1,:), s1(2, :), 1, 1, seq(1, :), seq(2, :));
+end
+end
+
+function c = cell_build(e, num)
+c = cell(1, sum(num));
+for i = 1:length(e)
+    for j = 1:num(i)
+        c{j+sum(num(1:i-1))} = e{i};
+    end
+end
+c = c(1, randperm(sum(num)));
+end
+
+
+5
+% to genarate golay complementary sequences of given length
+% input: len is the length of required sequences
+% output: seq is 2×len matrices, whose row vectors are golay sequences
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+function seq = gen_golay_sequences(len)
+try
+    seq = golay(len, 'binary');
+    return;
+catch
+    try
+        seq = golay(len, 'quaternary');
+        return;
+    catch
+    end
+end
+
+[expo, num] = expo_dec(len, 2);
+assert(num<=245, 'Infeasible length!');
+struct = load(sprintf('./atoms/cm_cc_%d.mat', num));
+atom = struct.W;
+
+for i = 1:expo
+    atom = golay_double(atom);
+end
+seq = atom';
+end
+
+function seq = golay_double(atom)
+seq(:, 1) = [atom(:, 1); atom(:, 2)];
+seq(:, 2) = [atom(:, 1); -atom(:, 2)];
+end
+
+6
+% to generate Golay matrices of M rows and L columns.
+% input: M is the number of the rows
+%        L is the number of the columns
+% output: A and B are Golay complementary matrices
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+function [A, B] = gen_golay_matrices(M, L)
+assert(mod(M, 2)==0 || mod(L, 2)==0, 'Infeasible length!');
+if mod(M, 2) == 0
+    L1 = M/2;
+    L2 = L;
+    dim = 1;
+else
+    L1 = M;
+    L2 = L/2;
+    dim = 2;
+end
+
+try
+    pair1 = gen_golay_sequences(L1);
+    pair2 = gen_golay_sequences(L2);
+catch
+    error('Infeasible length!')
+end
+
+a = pair1(1, :).';
+b = pair1(2, :).';
+c = pair2(1, :).';
+d = pair2(2, :).';
+A = cat(dim, a*c.', b*d.');
+B = cat(dim, -a*flip(d'), b*flip(c'));
+close all;
+figure;
+stem3(abs(xcorr2(A) + xcorr2(B)));
+end
+
+7
+function [a,b] = gen_const_modul_golay_codes(M,psl)
+% to generate constant modulus L-length Golay complementary codes
+% inputs:
+%        M: coding length
+%        psl: peak sidelobe
+% output: 
+%        a,b: the obtained Golay pair
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+if nargin < 2
+    psl = 1e-15;
+end
+
+% %%
+for nn = 1:1e6 
+    xk = 2*pi*rand(2*M,1); % random initialization
+    [f,df] = calc_f_df(xk);
+    normOld = norm(f);
+    zeroImprovCnt = 0;
+    iterCnt = 0;
+    while zeroImprovCnt <= 15  % one of the try to solve the equations        
+        Jacobi = [real(df);imag(df)];
+        f = [real(f);imag(f)];
+%        vNt = pinv(Jacobi)*f;
+        [Q,R] = qr(Jacobi.',0);   Rt = R.';   vNt = Q*(Rt\f); % it's faster than using pinv;
+        s = 1;
+        for n = 1:50  % to find s
+            ys = xk-s*vNt;
+            f = calc_f_df(ys);
+            normNew = norm(f);
+            if normNew <= (1-s/2)*normOld
+                break;
+            end
+            s = s/2;
+        end
+        xk = ys;
+        currPsl = max(abs(f))/(2*M);
+        if currPsl<psl % the Jacobi matrix will be nearly singular when get close to a solution
+            fprintf('M= %d, Try # %4d, Terminate after %3d Iterations, PSL = %E\n',M,nn,iterCnt, currPsl);
+            W = exp(1j*reshape(ys,M,2));
+            fprintf('M= %d, Done after %d iterations!\n',M,iterCnt);
+            % sv = svd(Jacobi);
+            % sv(2*(M-1)-1)
+            a = W(:,1);
+            b = W(:,2);
+            figure,semilogy(-M+1:M-1,abs(xcorr(a)+xcorr(b))/(2*M));
+            return
+        end
+        if abs(normNew-normOld) < 1e-4*normOld
+            zeroImprovCnt = zeroImprovCnt + 1;
+        else
+            zeroImprovCnt = 0;
+        end
+        [f,df] = calc_f_df(xk);
+        normOld = normNew;
+        iterCnt = iterCnt+1;
+    end
+    %if mod(nn,10)==1
+    fprintf('M= %d, Try # %4d, Terminate after %3d Iterations, PSL = %E\n',M,nn,iterCnt, currPsl);
+    %end
+end
+end
+
+function [f,df] = calc_f_df(x)
+M = length(x)/2;
+thta = x(1:M);
+phi = x(M+1:2*M);
+if nargout==1
+        f1 = calc_f_df_sub(thta);
+        f2 = calc_f_df_sub(phi);
+        f = f1+f2;
+else
+        [f1,df1] = calc_f_df_sub(thta);
+        [f2,df2] = calc_f_df_sub(phi);
+        f = f1+f2;
+        df = [df1 df2];
+end
+end
+function [f,df] = calc_f_df_sub(thta)
+M = length(thta);
+e = exp(1j*thta);
+L = 2^ceil(log2(2*M-1));
+fe = fft(e,L);
+x = ifft(abs(fe).^2);
+f = x(L:-1:L-M+2);
+if nargout>1
+%     H = hankel(conj(e(2:M)),[conj(e(M)),zeros(1,M-1)]);
+%     df1 = H*diag(1j*e); 
+    df = zeros(M-1,M);
+    for n = 1:M-1
+        df(n,1:M-n) = 1j*e(1:M-n).*conj(e(n+1:M));
+        df(n,n+1:M) = df(n,n+1:M)-df(n,1:M-n);
+    end
+%     T = toeplitz(zeros(M-1,1),[0 e(1:M-1).']);
+%     df2 = 1j*(H*diag(e)-T*diag(conj(e)));
+    return
+else
+    df = [];
+end
+end
+
+8
+% to extract an exponential of a given base from a number
+% input: num is the given number 
+%        base is the given base
+% output: expo is the exponential and num is the processed number
+% Last modified on Oct. 8, 2020
+% Copyright Communication System Research Laboratory, Fudan University
+function [expo, num] = expo_dec(num, base)
+expo = 0;
+while mod(num, base) == 0
+    num = num / base;
+    expo = expo + 1;
+end
+
+
+9
+[A, B] = gen_golay_matrices(M, L);
+
+Input: (M, L), the size of golay matrices, at least one of M and L must be even.
+Output: [A, B], two genarated golay matrices, the sum of whose auto-correlation functions is a 2-D delta-function, which is illustrated in a figure:
+example
+
+10
+
