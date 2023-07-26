@@ -1,0 +1,61 @@
+syms q m a;
+q=2;
+p=2;
+m=7;
+
+B=zeros(m,q^m);
+r=exp(2*pi*sqrt(-1)/p);
+ for a=1:m
+     for v=1: q^m
+       B(a,v)=mod(floor((v-1-mod(v-1,q^(a-1)))/(q^(a-1))),q);
+       v=v+1;
+     end 
+ end
+x1=B(1,:);
+x2=B(2,:);
+x3=B(3,:);
+x4=B(4,:);
+x5=B(5,:);
+x6=B(6,:);
+x7=B(7,:);
+u2=zeros(q^2,q^m);
+v2=zeros(q^2,q^m);
+u2=zeros(q^2,q^m);
+v=zeros(q^2,q^m);
+for i=1:q
+for j=1:q
+   u2(i+(j-1)*2,:)=x1.*x2+x2.*x3+x3.*x4+x4.*x5+x5.*x6+(i-1)*x1+(j-1)*x7+x6+x7.*x1;
+   v2(i+(j-1)*2,:)=x1.*x2+x2.*x3+x3.*x4+x4.*x5+x5.*x6+(i-1)*x1+(j-1)*x7;
+u(i+(j-1)*2,:)=(-1).^u2(i+(j-1)*2,:);
+v(i+(j-1)*2,:)=(-1).^v2(i+(j-1)*2,:);
+end
+end
+b=1;
+u1=u(:,1:1:2^(m-1)+2^b);
+v1=v(:,1:1:2^(m-1)+2^b);
+c=zeros(4,3);
+s=cat(2,u1,c,v1);
+tic
+sym a;
+h=zeros(1,4);
+for i=1:4
+f=s(i,:);
+a=length(f);
+IAPR=zeros(1,101);
+z=0;
+for t=0:0.01:1
+  z=100*t+1; 
+   r = 0;
+    for k = 0:1:a-1
+   r=r+f(k+1)*exp(2*pi*k*sqrt(-1)*t);
+    end
+Pc = r*conj(r);
+IAPR(round(z)) = Pc/132;
+end
+papr_value=max(IAPR);
+h(i)=papr_value;
+end
+disp("The PAPR of f is");
+disp(max(h));
+
+clear
