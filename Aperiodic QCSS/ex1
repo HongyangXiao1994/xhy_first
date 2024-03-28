@@ -168,3 +168,105 @@ end if;
 Write("output1.txt", theta);
 end for;
 
+
+
+function AddChar(q,b,c)
+G:=GF(q);
+f,p,k:=IsPrimePower(q);
+//zeta_p:="zeta_" cat IntegerToString(p);
+R<zeta_p>:=CyclotomicField(p);
+exp:=Integers()!AbsoluteTrace(G!b*G!c);
+return zeta_p^exp;
+end function;
+//chic:=AddChar(q,b,c);
+
+p:=3;
+m:=2;
+q:=p^m;
+Fq<u>:=GF(q);
+Fq<w>:=GF(q^2);
+
+Fp:=GF(p);
+PrimitivePolynomial(Fp, 2);
+
+C:=[];
+for m_1:=0 to  q do
+Cm1:=[];
+for m_2:=0 to  q-2 do
+Cm1m2:=[];
+for k:=0 to q-2 do
+ Cm1m2[k+1]:=[];
+for i:=0 to q-2 do
+Cm1m2[k+1,i+1]:=AddChar(q,u^k,Trace(w^(m_1*(q-1)+i), GF(q)))*AddChar(q,u^(m_2),w^((q+1)*i));
+end for;
+Cm1m2[q]:=[];
+for i:=0 to q-2 do
+Cm1m2[q,i+1]:=AddChar(q,u^(m_2),w^((q+1)*i));
+end for;
+end for;
+
+Cm1q:=[];
+for k:=0 to q-2 do
+ Cm1q[k+1]:=[];
+for i:=0 to q-2 do
+Cm1q[k+1,i+1]:=AddChar(q,u^k,Trace(w^(m_1*(q-1)+i), GF(q)));
+end for;
+Cm1q[q]:=[];
+for i:=0 to q-2 do
+Cm1q[q,i+1]:=1;
+end for;
+end for;
+
+
+Cm1[m_2+1]:=Cm1m2;
+Cm1[q]:=Cm1q;
+end for;
+C[m_1+1]:=Cm1;
+end for;
+C;
+//Write("output.txt", C);
+function auto(si,sj,tau,N)
+r:=0;
+for t:=0 to N-1-tau do
+ r+:=si[t+1]*ComplexConjugate(sj[t+tau+1]);
+end for;
+return r;
+end function;
+
+for tau:=0 to q-2 do
+theta:=0;
+RCm1m3Cm2m4tau:=0;
+for k:=1 to q do
+RCm1m3Cm2m4tau+:=auto(C[1,1,k],C[1,2,k],tau,q-1);
+end for;
+if theta lt Modulus(RCm1m3Cm2m4tau) then
+		theta:=Modulus(RCm1m3Cm2m4tau);
+end if;
+Write("outputex3.txt", theta);
+end for;
+
+//计算最大相关值
+theta:=0;
+for m1:=0 to q do
+for m2:=0 to q do
+for m3:=0 to q-1 do
+for m4:=0 to q-1 do
+for tau:=0 to q-2 do
+
+if tau eq 0 and m1 eq m2 and  m3 eq m4 then continue;end if;
+RCm1m3Cm2m4tau:=0;
+for k:=1 to q do
+RCm1m3Cm2m4tau+:=auto(C[m1+1,m3+1,k],C[m2+1,m4+1,k],tau,q-1);
+end for;
+if theta lt Modulus(RCm1m3Cm2m4tau) then
+		theta:=Modulus(RCm1m3Cm2m4tau);
+end if;
+//theta;
+//[m1,m2,m3,m4,tau];
+end for;
+end for;
+end for;
+end for;
+end for;
+
+
