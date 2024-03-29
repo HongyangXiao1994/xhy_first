@@ -1,0 +1,108 @@
+function AddChar(q,b,c)
+G:=GF(q);
+f,p,k:=IsPrimePower(q);
+//zeta_p:="zeta_" cat IntegerToString(p);
+R<zeta_p>:=CyclotomicField(p);
+exp:=Integers()!AbsoluteTrace(G!b*G!c);
+return zeta_p^exp;
+end function;
+//chic:=AddChar(q,b,c);
+
+p:=5;
+m:=2;
+q:=p^m;
+Fq<w>:=GF(q);
+
+Fp:=GF(p);
+PrimitivePolynomial(Fp, 2);
+
+C:=[];
+for a:=0 to  (q-1 div p-1)-1 do
+Ca:=[];
+for b:=0 to  p-2 do
+Cab:=[];
+for c:=0 to q-2 do
+ Cabc:=[];
+for i:=0 to q-2 do
+ Cabc[i+1]:=[];
+for j:=0 to q-2 do
+Cabc[i+1,j+1]:=AddChar(q,w^a, w^(i+j))*AddChar(q,w^(b*(q-1) div (p-1)),w^j)*AddChar(q,w^(c),w^i);
+end for;
+end for;
+ Cabc[q]:=[];
+for j:=0 to q-2 do
+ Cabc[q,j+1]:=AddChar(q,w^(b*(q-1) div (p-1)),w^j); 
+end for;
+
+  Cabq:=[];
+for i:=0 to q-2 do
+ Cabq[i+1]:=[];
+for j:=0 to q-2 do
+Cabq[i+1,j+1]:=AddChar(q,w^a, w^(i+j))*AddChar(q,w^(b*(q-1) div (p-1)),w^j);
+end for;
+end for;
+ Cabq[q]:=[];
+for j:=0 to q-2 do
+ Cabq[q,j+1]:=AddChar(q,w^(b*(q-1) div (p-1)),w^j); 
+end for;
+
+Cab[c+1]:=Cabc;
+Cab[q]:=Cabq;
+end for;
+Ca[b+1]:=Cab;
+end for;
+C[a+1]:=Ca;
+end for;
+ 
+ 
+
+function auto(si,sj,tau,N)
+r:=0;
+for t:=0 to N-1-tau do
+ r+:=si[t+1]*ComplexConjugate(sj[t+tau+1]);
+end for;
+return r;
+end function;
+ Write("readpex1.txt", C);
+
+
+
+for tau:=0 to q-2 do
+theta:=0;
+Rtau:=0;
+for k:=1 to q do
+Rtau+:=auto(C[1,1,2,k],C[1,1,2,k],tau,q-1);
+end for;
+if theta lt Modulus(Rtau) then
+		theta:=Modulus(Rtau);
+end if;
+ Write("pex4.txt", theta);
+end for;
+ 
+
+//计算最大相关值
+
+for a1:=0 to  (q-1 div p-1)-1 do
+for a2:=0 to  (q-1 div p-1)-1 do
+for b1:=0 to  p-2 do
+for b2:=0 to  p-2 do
+for c1:=0 to q-1 do
+for c2:=0 to q-1 do
+for tau:=0 to q-2 do
+theta:=0;
+Rtau:=0;
+for k:=1 to q do
+Rtau+:=auto(C[a1+1,b1+1,c1+1,k],C[a2+1,b2+1,c2+1,k],tau,q-1);
+end for;
+if theta lt Modulus(Rtau) then
+		theta:=Modulus(Rtau);
+end if;
+theta;
+[a1,a2,b1,b2,c1,c2,tau];
+end for;
+end for;
+end for;
+end for;
+end for;
+end for;
+end for;
