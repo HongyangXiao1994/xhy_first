@@ -1,0 +1,22 @@
+A := Matrix(Fq, 3, 3, [[1,0,1],[0,1,0],[1,0,1]]);
+// 将矩阵转换为Matlab格式的函数
+function MatrixToMatlabFormat(A)
+    s := "A = [";
+    for i in [1..Nrows(A)] do
+        for j in [1..Ncols(A)] do
+            s cat:= IntegerToString(A[i,j]);
+            if j lt Ncols(A) then
+                s cat:= ", ";
+            end if;
+        end for;
+        if i lt Nrows(A) then
+            s cat:= "; ";
+        end if;
+    end for;
+    s cat:= "];";
+    return s;
+end function;
+
+// 转换并写入文件
+formattedString := MatrixToMatlabFormat(A);
+formattedString;
